@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>គណនាថ្លៃផ្ញើរយានជំនិះ</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#000000;     /* ផ្ទៃទំព័រ (ខ្មៅ) */
+  --card:#272222;     /* ផ្ទៃផ្ទាំងខាងក្នុង (ខ្មៅ) */
+  --ink:#ffffff;      /* អក្សរ និងព្រំដែនប្រអប់ */
+  --btn:#d0463f;      /* ប៊ូតុង */
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font-family:"Kantumruy Pro","Khmer OS Battambang","Noto Sans Khmer",system-ui,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px 16px}
+.panel{width:100%;max-width:380px;background:var(--card);padding:28px 24px 32px;
+  border:1px solid #333;border-radius:12px}
+h1{margin:0 0 24px;text-align:center;font-size:1.5rem;font-weight:700}
+.row{display:grid;grid-template-columns:125px 1fr;align-items:center;gap:12px;margin-bottom:14px}
+label{font-weight:600}
+input,select{width:100%;height:48px;border:1px solid var(--ink);border-radius:10px;
+  background:transparent;color:var(--ink);font:inherit;padding:0 14px}
+select option{color:#1a1a1a}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}
+.unit{position:relative}
+.unit span{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-weight:700;pointer-events:none}
+.unit input{padding-right:40px;text-align:right;font-weight:700}
+button{width:100%;height:52px;margin-top:10px;border:0;border-radius:10px;background:var(--btn);
+  color:#fff;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+#note{margin:12px 0 0;min-height:1.4em;font-size:.9rem;text-align:center}
+</style>
+</head>
+<body>
+  <section class="panel">
+    <h1>គណនាថ្លៃផ្ញើរយានជំនិះ</h1>
+
+    <div class="row"><label for="veh">ជ្រើសរើស យានជំនិះ</label>
+      <select id="veh">
+        <option value="car">ឡាន</option>
+        <option value="moto">ម៉ូតូ</option>
+      </select></div>
+
+    <div class="row"><label for="tin">ម៉ោងចូល</label>
+      <input id="tin" type="time"></div>
+
+    <div class="row"><label for="tout">ម៉ោងចេញ</label>
+      <input id="tout" type="time"></div>
+
+    <div class="row"><label for="riel">ថ្លៃផ្ញើរ រៀល</label>
+      <div class="unit"><input id="riel" readonly><span>៛</span></div></div>
+
+    <div class="row"><label for="usd">ថ្លៃផ្ញើរ ដុល្លា</label>
+      <div class="unit"><input id="usd" readonly><span>$</span></div></div>
+
+    <button id="go" type="button">គណនា</button>
+    <p id="note" role="status"></p>
+  </section>
+
+<script>
+// ថ្លៃក្នុង ១ ម៉ោង (រៀល): base = 8 ម៉ោងដំបូង, over = ម៉ោងដែលលើស
+var RATES = { car:{base:500, over:1000}, moto:{base:200, over:300} };
+var RIEL_PER_USD = 4000;
+
+function toMin(v){
+  var p = v.split(":");
+  return Number(p[0]) * 60 + Number(p[1]);
+}
+
+function calculate(){
+  var veh  = document.getElementById("veh").value;
+  var tin  = document.getElementById("tin").value;
+  var tout = document.getElementById("tout").value;
+  var note = document.getElementById("note");
+
+  if(!tin || !tout){
+    note.textContent = "សូមបញ្ចូលម៉ោងចូល និងម៉ោងចេញ";
+    return;
+  }
+
+  var mins = toMin(tout) - toMin(tin);
+  if(mins <= 0) mins += 24 * 60;        
+  var hours = Math.ceil(mins / 60);     
+
+  var r = RATES[veh];
+  var normal = Math.min(hours, 8);      
+  var extra  = Math.max(hours - 8, 0);  
+  var riel   = normal * r.base + extra * r.over;
+
+  document.getElementById("riel").value = riel.toLocaleString("en-US");
+  document.getElementById("usd").value  = (riel / RIEL_PER_USD).toFixed(2);
+  note.textContent = "រយៈពេល " + hours + " ម៉ោង";
+}
+
+document.getElementById("go").addEventListener("click", calculate);
+</script>
+</body>
+</html>
